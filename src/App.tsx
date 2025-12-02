@@ -194,6 +194,10 @@ function App() {
           maxZoom={2}
           defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
           colorMode={darkMode ? 'dark' : 'light'}
+          selectionOnDrag={true}
+          panOnDrag={true}
+          selectionKeyCode="Shift"
+          multiSelectionKeyCode="Meta"
         >
           <Background />
           <Controls />
