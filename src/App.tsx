@@ -109,7 +109,7 @@ function App() {
         positions: Object.keys(positions).length > 0 ? positions : undefined,
         hasManualLayout: hasManualLayout || undefined,
       });
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [text, hasManualLayout, nodes]); // Include nodes to detect position changes
@@ -119,8 +119,9 @@ function App() {
       const updatedNodes = applyNodeChanges(changes, nds);
 
       // Check if any change is a position change (drag)
+      // onNodesChange only fires for user interactions, so any position change here is a drag
       const hasPositionChange = changes.some(
-        change => change.type === 'position' && change.dragging
+        change => change.type === 'position'
       );
 
       if (hasPositionChange) {
@@ -194,10 +195,6 @@ function App() {
           maxZoom={2}
           defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
           colorMode={darkMode ? 'dark' : 'light'}
-          selectionOnDrag={true}
-          panOnDrag={true}
-          selectionKeyCode="Shift"
-          multiSelectionKeyCode="Meta"
         >
           <Background />
           <Controls />
