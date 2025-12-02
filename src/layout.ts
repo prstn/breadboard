@@ -1,4 +1,4 @@
-import { Node, Edge } from 'reactflow';
+import { Node, Edge } from '@xyflow/react';
 import { BreadboardItem, ParsedBreadboard } from './types';
 
 const VERTICAL_SPACING = 40;
@@ -31,7 +31,7 @@ function mapItemsToPlace(items: BreadboardItem[], placeId: string, context: Layo
   });
 }
 
-export function createReactFlowElements(breadboard: ParsedBreadboard): { nodes: Node[]; edges: Edge[] } {
+export function createReactFlowElements(breadboard: ParsedBreadboard, darkMode = false): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
   const context: LayoutContext = {
@@ -104,7 +104,8 @@ export function createReactFlowElements(breadboard: ParsedBreadboard): { nodes: 
         placeId: node.id,
         linkTargets: linkTargets,
         hasIncomingLinks: placesWithIncomingLinks.has(node.id),
-        handleColors: handleColors
+        handleColors: handleColors,
+        darkMode: darkMode
       },
       draggable: true,
     });

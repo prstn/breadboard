@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position } from '@xyflow/react';
 import { NodeType, BreadboardItem } from '../types';
 
 interface PlaceNodeData {
@@ -11,9 +11,10 @@ interface PlaceNodeData {
   linkTargets?: Set<string>;
   hasIncomingLinks?: boolean;
   handleColors?: Map<string, string>;
+  darkMode?: boolean;
 }
 
-function ItemRenderer({ item, depth = 0, onDragStart, onDragOver, onDrop, linkTargets, handleColors }: {
+function ItemRenderer({ item, depth = 0, onDragStart, onDragOver, onDrop, linkTargets, handleColors, darkMode }: {
   item: BreadboardItem;
   depth?: number;
   onDragStart: (item: BreadboardItem) => void;
@@ -21,29 +22,31 @@ function ItemRenderer({ item, depth = 0, onDragStart, onDragOver, onDrop, linkTa
   onDrop: (item: BreadboardItem) => void;
   linkTargets?: Set<string>;
   handleColors?: Map<string, string>;
+  darkMode?: boolean;
 }) {
   if (item.isSeparator) {
-    return <div className="border-t border-gray-400 my-2" />;
+    return <div className={`border-t my-2 ${darkMode ? 'border-gray-600' : 'border-gray-400'}`} />;
   }
 
   const getItemClass = () => {
-    const baseClass = 'px-3 py-2 rounded text-sm cursor-move border bg-white relative';
+    const baseClass = `px-3 py-2 rounded text-sm cursor-move border relative ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white'}`;
     switch (item.type) {
       case 'button':
-        return `${baseClass} bg-blue-50 border-blue-400 font-medium`;
+        return `${baseClass} ${darkMode ? 'bg-blue-900 border-blue-600' : 'bg-blue-50 border-blue-400'} font-medium`;
       case 'input':
-        return `${baseClass} border-gray-400`;
+        return `${baseClass} ${darkMode ? 'border-gray-600' : 'border-gray-400'}`;
       default:
-        return `${baseClass} border-gray-300`;
+        return `${baseClass} ${darkMode ? 'border-gray-600' : 'border-gray-300'}`;
     }
   };
 
   const getIcon = () => {
+    const iconBorderClass = darkMode ? 'border-gray-400' : 'border-gray-600';
     switch (item.type) {
       case 'checkbox':
-        return <span className="w-4 h-4 border-2 border-gray-600 rounded inline-block mr-2"></span>;
+        return <span className={`w-4 h-4 border-2 ${iconBorderClass} rounded inline-block mr-2`}></span>;
       case 'radio':
-        return <span className="w-4 h-4 border-2 border-gray-600 rounded-full inline-block mr-2"></span>;
+        return <span className={`w-4 h-4 border-2 ${iconBorderClass} rounded-full inline-block mr-2`}></span>;
       default:
         return null;
     }
@@ -75,13 +78,13 @@ function ItemRenderer({ item, depth = 0, onDragStart, onDragOver, onDrop, linkTa
               height: '8px',
               border: `2px solid ${handleColors?.get(`${item.id}-target`) || '#94a3b8'}`,
               borderRadius: '50%',
-              background: 'white',
+              background: darkMode ? '#1f2937' : 'white',
             }}
           />
         )}
         {getIcon()}
         <span>{item.text}</span>
-        {item.link && <span className="ml-2 text-gray-500 text-xs">→ {item.link}</span>}
+        {item.link && <span className={`ml-2 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>→ {item.link}</span>}
         {item.link && (
           <Handle
             type="source"
@@ -96,7 +99,7 @@ function ItemRenderer({ item, depth = 0, onDragStart, onDragOver, onDrop, linkTa
               height: '8px',
               border: `2px solid ${handleColors?.get(`${item.id}-source`) || '#94a3b8'}`,
               borderRadius: '50%',
-              background: 'white',
+              background: darkMode ? '#1f2937' : 'white',
             }}
           />
         )}
@@ -113,6 +116,7 @@ function ItemRenderer({ item, depth = 0, onDragStart, onDragOver, onDrop, linkTa
               onDrop={onDrop}
               linkTargets={linkTargets}
               handleColors={handleColors}
+              darkMode={darkMode}
             />
           ))}
         </div>
@@ -127,26 +131,27 @@ function BreadboardPlaceNode({ data }: { data: PlaceNodeData }) {
 
   // Get styling based on node type
   const getNodeStyle = () => {
+    const darkMode = data.darkMode;
     switch (data.nodeType) {
       case 'page':
         return {
-          containerClass: 'bg-blue-50 border-2 border-blue-500 rounded shadow-md min-w-[280px] max-w-[400px] relative',
-          headerClass: 'px-4 py-2.5 font-semibold text-base border-b-2 border-blue-500 bg-blue-100',
+          containerClass: `border-2 border-blue-500 rounded shadow-md min-w-[280px] max-w-[400px] relative ${darkMode ? 'bg-blue-950' : 'bg-blue-50'}`,
+          headerClass: `px-4 py-2.5 font-semibold text-base border-b-2 border-blue-500 ${darkMode ? 'bg-blue-900 text-blue-100' : 'bg-blue-100'}`,
         };
       case 'component':
         return {
-          containerClass: 'bg-purple-50 border-2 border-purple-500 rounded shadow-md min-w-[280px] max-w-[400px] relative',
-          headerClass: 'px-4 py-2.5 font-semibold text-base border-b-2 border-purple-500 bg-purple-100',
+          containerClass: `border-2 border-purple-500 rounded shadow-md min-w-[280px] max-w-[400px] relative ${darkMode ? 'bg-purple-950' : 'bg-purple-50'}`,
+          headerClass: `px-4 py-2.5 font-semibold text-base border-b-2 border-purple-500 ${darkMode ? 'bg-purple-900 text-purple-100' : 'bg-purple-100'}`,
         };
       case 'dialog':
         return {
-          containerClass: 'bg-amber-50 border-2 border-amber-500 rounded shadow-md min-w-[280px] max-w-[400px] relative',
-          headerClass: 'px-4 py-2.5 font-semibold text-base border-b-2 border-amber-500 bg-amber-100',
+          containerClass: `border-2 border-amber-500 rounded shadow-md min-w-[280px] max-w-[400px] relative ${darkMode ? 'bg-amber-950' : 'bg-amber-50'}`,
+          headerClass: `px-4 py-2.5 font-semibold text-base border-b-2 border-amber-500 ${darkMode ? 'bg-amber-900 text-amber-100' : 'bg-amber-100'}`,
         };
       default: // 'place' and others
         return {
-          containerClass: 'bg-white border-2 border-gray-800 rounded shadow-md min-w-[280px] max-w-[400px] relative',
-          headerClass: 'px-4 py-2.5 font-semibold text-base border-b-2 border-gray-800',
+          containerClass: `border-2 border-gray-800 rounded shadow-md min-w-[280px] max-w-[400px] relative ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white'}`,
+          headerClass: `px-4 py-2.5 font-semibold text-base border-b-2 ${darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-800'}`,
         };
     }
   };
@@ -206,7 +211,7 @@ function BreadboardPlaceNode({ data }: { data: PlaceNodeData }) {
             height: '8px',
             border: `2px solid ${data.handleColors?.get(`${data.placeId}-place-target`) || '#1f2937'}`,
             borderRadius: '50%',
-            background: 'white',
+            background: data.darkMode ? '#1f2937' : 'white',
           }}
         />
       )}
@@ -223,6 +228,7 @@ function BreadboardPlaceNode({ data }: { data: PlaceNodeData }) {
             onDrop={handleDrop}
             linkTargets={data.linkTargets}
             handleColors={data.handleColors}
+            darkMode={data.darkMode}
           />
         ))}
       </div>

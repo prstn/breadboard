@@ -12,6 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@xyflow/react": "^12.9.3",
+    "lucide-react": "^0.555.0",
     "lz-string": "^1.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

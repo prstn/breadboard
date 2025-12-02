@@ -1,5 +1,6 @@
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react';
-import ReactFlow, {
+import {
+  ReactFlow,
   Background,
   Controls,
   MiniMap,
@@ -10,8 +11,9 @@ import ReactFlow, {
   OnEdgesChange,
   applyNodeChanges,
   applyEdgeChanges,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { Download, Moon, Sun } from 'lucide-react';
 
 import BreadboardPlaceNode from './nodes/BreadboardPlaceNode';
 import { parseBreadboard } from './parser';
@@ -39,18 +41,21 @@ function App() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [hasManualLayout, setHasManualLayout] = useState(false);
+  const [darkMode, setDarkMode] = useState(() =>
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
   const nodePositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
   // Generate new layout from text
   const newLayout = useMemo(() => {
     try {
       const parsed = parseBreadboard(text);
-      return createReactFlowElements(parsed);
+      return createReactFlowElements(parsed, darkMode);
     } catch (error) {
       console.error('Parse error:', error);
       return { nodes: [], edges: [] };
     }
-  }, [text]);
+  }, [text, darkMode]);
 
   // Update nodes and edges when layout changes
   useEffect(() => {
@@ -133,29 +138,39 @@ function App() {
   }, [text]);
 
   return (
-    <div className="flex h-screen w-screen">
+    <div className={`flex h-screen w-screen ${darkMode ? 'dark' : ''}`}>
       {/* Left Panel - Text Editor */}
-      <div className="w-full max-w-[400px] flex flex-col border-r border-gray-300">
-        <div className="bg-gray-100 border-b border-gray-300 px-4 py-2 flex items-center justify-between">
-          <h1 className="font-semibold text-lg">Breadboard Editor</h1>
-          <button
-            onClick={handleExport}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
-          >
-            Export Markdown
-          </button>
+      <div className={`w-full max-w-[400px] flex flex-col border-r ${darkMode ? 'border-gray-700' : 'border-gray-300'}`}>
+        <div className={`px-4 py-2 flex items-center justify-between border-b ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`}>
+          <h1 className={`font-semibold text-lg ${darkMode ? 'text-white' : ''}`}>Breadboard Editor</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className={`p-2 transition-colors ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'}`}
+              title="Toggle dark mode"
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              onClick={handleExport}
+              className={`p-2 transition-colors ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'}`}
+              title="Export Markdown"
+            >
+              <Download size={18} />
+            </button>
+          </div>
         </div>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 p-4 font-mono text-sm resize-none focus:outline-none"
+          className={`flex-1 p-4 font-mono text-sm resize-none focus:outline-none ${darkMode ? 'bg-gray-900 text-gray-100' : ''}`}
           placeholder="Enter your breadboard here..."
           spellCheck={false}
         />
       </div>
 
       {/* Right Panel - React Flow Canvas */}
-      <div className="flex-1 bg-gray-50">
+      <div className={`flex-1 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -166,6 +181,7 @@ function App() {
           minZoom={0.1}
           maxZoom={2}
           defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+          colorMode={darkMode ? 'dark' : 'light'}
         >
           <Background />
           <Controls />
