@@ -18,7 +18,7 @@ import { Download, Moon, Sun } from 'lucide-react';
 import BreadboardPlaceNode from './nodes/BreadboardPlaceNode';
 import { parseBreadboard } from './parser';
 import { createReactFlowElements } from './layout';
-import { getInitialTextFromUrl, updateUrlHash } from './utils/urlState';
+import { getInitialStateFromUrl, updateUrlState } from './utils/urlState';
 
 const nodeTypes: NodeTypes = {
   breadboardPlace: BreadboardPlaceNode,
@@ -37,14 +37,19 @@ Dashboard
 - Logout.button => Login Page`;
 
 function App() {
-  const [text, setText] = useState(() => getInitialTextFromUrl(defaultText));
+  // Load initial state from URL
+  const initialState = useMemo(() => getInitialStateFromUrl(defaultText), []);
+
+  const [text, setText] = useState(initialState.text);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [hasManualLayout, setHasManualLayout] = useState(false);
+  const [hasManualLayout, setHasManualLayout] = useState(initialState.hasManualLayout || false);
   const [darkMode, setDarkMode] = useState(() =>
     window.matchMedia('(prefers-color-scheme: dark)').matches
   );
-  const nodePositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const nodePositionsRef = useRef<Map<string, { x: number; y: number }>>(
+    new Map(Object.entries(initialState.positions || {}))
+  );
 
   // Generate new layout from text
   const newLayout = useMemo(() => {
@@ -93,14 +98,21 @@ function App() {
     }
   }, [newLayout, hasManualLayout]);
 
-  // Sync text to URL with debounce
+  // Sync state to URL with debounce
   useEffect(() => {
     const timer = setTimeout(() => {
-      updateUrlHash(text);
+      // Convert Map to plain object for URL storage
+      const positions = Object.fromEntries(nodePositionsRef.current);
+
+      updateUrlState({
+        text,
+        positions: Object.keys(positions).length > 0 ? positions : undefined,
+        hasManualLayout: hasManualLayout || undefined,
+      });
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [text]);
+  }, [text, hasManualLayout, nodes]); // Include nodes to detect position changes
 
   const onNodesChange: OnNodesChange = useCallback((changes) => {
     setNodes((nds) => {
