@@ -2,6 +2,8 @@
 
 A UI breadboarding app for sketching interface concepts using a text-based notation inspired by the Shape Up methodology.
 
+https://prstn.github.io/breadboard
+
 ## What is Breadboarding?
 
 Breadboarding is a lightweight notation method for sketching interface concepts at the right level of abstraction. It helps teams move fast and explore different ideas without getting dragged down by visual details.
